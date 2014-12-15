@@ -1,0 +1,8 @@
+*.pickle
+*.DS_Store
+*.pyc
+*.jpg
+*.csv
+*.png
+*.tex
+tb/*
