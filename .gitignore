@@ -3,6 +3,14 @@
 *.pyc
 *.jpg
 *.csv
-*.png
 *.tex
+*.mp3
+*.hashes
+*.zip
+*.rnd
+rpcudp-master
+unti
+reconstructed/*
 tb/*
+scrambled/*
+*.pid

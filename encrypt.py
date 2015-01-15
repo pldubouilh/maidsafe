@@ -9,7 +9,10 @@ from pbkdf2 import pbkdf2_hex
 from shaGeneration import *
 from entropy import *
 from tools import *
+import itertools
 import pdb
+import sys
+
 #pdb.set_trace()
 
 import pickle
@@ -19,15 +22,17 @@ from twisted.python import log
 from kademlia.network import Server
 
 
-
+debug = 'wee'
 
 def sendChunks(result, i, server, encrypedHashes):
 
-  print 'GET >> ' + str(i)
+  if debug == 'normal': print '    Setting slice #' + str(i)
 
   # Out of bound, stop reactor and leave
   if i == len(encrypedHashes) :
     reactor.stop()
+    print '    File Sent !'
+    print '    Note that if you delete your .hashes file and your initial file, it will be lost in the cyphernetic ether...'
     return
 
   # Get file i
@@ -44,9 +49,76 @@ def sendChunks(result, i, server, encrypedHashes):
 
 
 
+def splitChunks(initFile, shas, encrypedHashes):
+
+    # Determine size to rechunk. (Twisted UDP Limit + headers)
+    maxSize = 4000
+    firstElt = ('scrambled/' + str(encrypedHashes[0]))
+    fc = open(firstElt, 'rb')
+    scrambledData = fc.read()
+    fc.close()
+
+    # Compute Resizing factor
+    rechunckFactor = len(scrambledData)/maxSize
+    #if(len(scrambledData)%maxSize):
+    #  rechunckFactor+=1
+    print '    Splitting chunks in smaller slices.'
+    print '    Resizing Factor >> ' + str(rechunckFactor)
+
+    splitedHashes= []
+
+
+    # Loop on all chunks # Should be encrypedHashes
+    for i in range(0, len(encrypedHashes)):
+
+      # Read content of the file
+      inputFile = 'scrambled/' + str(encrypedHashes[i])
+      f = open(inputFile, 'rb')
+      data = f.read() # read the entire content of the file
+      f.close()
+
+      # Compute new hashes, and save on new list
+      newHashes = listShas(inputFile, maxSize)
+      splitedHashes.append(newHashes)
+
+
+      # Loop on all sub-chunks and save
+      for j in range(0, len(scrambledData), maxSize):
+        chunkNumer = j/maxSize
+        subChunk = data[j:j+maxSize]
+
+        # empty chunk
+        if (len(subChunk) == 0): break
+
+        newChunk = 'scrambled/' + str(newHashes[chunkNumer])
+        fc = open(newChunk, 'wb')
+        fc.write(subChunk)
+        fc.close()
+
+
+
+    # Saving the objects: initial hashes, encrypted Hashes and splited hashes
+    with open(initFile + '.hashes', 'wb') as f:
+      pickle.dump([shas, encrypedHashes, splitedHashes], f)
+
+    # Return 1 dimention list for to send on DHT
+    return list(itertools.chain(*splitedHashes))
+
+
+
+
+def maidSafeEncryptSetDebug(inputFile, chunkSize, server, debu, iterations=1000, xor=False, i=0):
+    global debug
+    debug = debu
+    maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=0)
+
+
+
 def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=0):
 
+
     # List and save all shas
+    print '    Computing Shas...'
     shas = listShas(inputFile, chunkSize)
 
     # Read the contents of the file
@@ -67,6 +139,8 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
 
     # Init Encripted hashes list
     encrypedHashes = []
+
+    print '    Cipherin\''
 
     # Scan all chunks
     for i in range(0, bytes, chunkSize):
@@ -104,7 +178,7 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       outCipher = cipher.encrypt(dataToHash).encode('hex')
 
       # Quick sanity check
-      print 'Cipherin\' !'
+      if debug != 'wee': print '    Cipherin\''
 
       # Xor outCipher and pbkdfOut
       if xor : scrambledChunck = strxor(outCipher.decode("hex"),keyDerivOut.decode("hex"))
@@ -121,10 +195,9 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       fc.close()
 
 
-    # Saving the objects:
-    with open(inputFile + '.hashes', 'wb') as f:
-        pickle.dump([shas, encrypedHashes], f)
+    # Rector chunks into smaller chunks, swallowable by kademlia
+    chunckToSend = splitChunks(inputFile, shas, encrypedHashes)
 
 
     # Send chunks on DHT
-    sendChunks(0, 0, server, encrypedHashes)
+    sendChunks(0, 0, server, chunckToSend)

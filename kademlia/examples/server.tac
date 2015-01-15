@@ -7,8 +7,9 @@ sys.path.append(os.path.dirname(__file__))
 from kademlia.network import Server
 from kademlia import log
 
+
 application = service.Application("kademlia")
-application.setComponent(ILogObserver, log.FileLogObserver(sys.stdout, log.INFO).emit)
+application.setComponent(ILogObserver, log.FileLogObserver(sys.stdout, log.CRITICAL).emit)
 
 '''
 if os.path.isfile('cache.pickle'):

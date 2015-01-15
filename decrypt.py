@@ -10,42 +10,69 @@ from tools import *
 import pdb
 import pickle
 import time
+import pdb
+#pdb.set_trace()
 
 from twisted.internet import reactor, task
 from twisted.python import log
 from kademlia.network import Server
 
 
+debug = 'wee'
 
-def grepChunks(result, i, server, encrypedHashes, inputHash, chunkSize):
+def grepChunks(result, i, j, server, splitedHashes, encrypedHashes, inputHash, chunkSize):
+
+  #pdb.set_trace()
 
   # Write result from previous query
   fn1 = encrypedHashes[i]
-  fc = open(('scrambled/' + fn1), 'wb')
-  fc.write(result.decode('hex'))
-  fc.close()
+
+  if debug == 'normal': print '    Getting (i,j) > ' + str(i) + ', ' + str(j)
+
+  # Create new file if new chunk. Append otherwise.
+  if (j == 0):
+    fc = open(('scrambled/' + fn1), 'wb')
+    fc.write(result.decode('hex'))
+    fc.close()
+  else:
+    fc = open(('scrambled/' + fn1), 'ab')
+    fc.write(result.decode('hex'))
+    fc.close()
+
 
   # Increment for next query
-  i += 1
+  if( (len(splitedHashes[i])-1) != j ):
+    j += 1
+  else:
+    i += 1
+    j = 0
 
-  # Got all the chunks, return bach to decryption scheme
+  # Got all the chunks, return back to decryption scheme
   if i == len(encrypedHashes) :
     reactor.stop()
+    print '    Chunks downloaded from DHT!'
+    print '    Decrypting...'
     maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=False)
     return
 
   # Get the next chunk
-  fn1 = encrypedHashes[i]
-  server.get(fn1).addCallback(grepChunks, i, server, encrypedHashes, inputHash, chunkSize)
+  fn1 = splitedHashes[i][j]
+  server.get(fn1).addCallback(grepChunks, i, j, server, splitedHashes, encrypedHashes, inputHash, chunkSize)
 
 
+def maidSafeDecryptSetDebug(inputHash, chunkSize, server, debu, grepNotDone=True, iterations=1000, xor=False):
+    global debug
+    debug = debu
+
+    print '    Downloading chunks from DHT...'
+    maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1000, xor=False)
 
 
 def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1000, xor=False):
 
     # Getting back the objects:
     with open(inputHash, 'rb') as f:
-        shas, encHashes = pickle.load(f)
+        shas, encHashes, splitedHashes = pickle.load(f)
 
     # Get filename
     filename = inputHash.replace('.hashes', '')
@@ -58,9 +85,9 @@ def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1
     noOfChunks = len(shas)
 
 
-    # Grep chunks if not done befor. Return and let callback do the job
+    # Grep chunks if not done before. Return and let callback do the job
     if (grepNotDone):
-      server.get(encHashes[0]).addCallback(grepChunks, 0, server, encHashes, inputHash, chunkSize)
+      server.get(splitedHashes[0][0]).addCallback(grepChunks, 0, 0, server, splitedHashes, encHashes, inputHash, chunkSize)
       return
 
 
@@ -111,4 +138,6 @@ def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1
       fc.write(outCipher)
       fc.close()
 
-      print 'Chunk...'
+      if debug != 'wee': print '    Chunk...'
+
+    print '    File successfully downloaded!'
