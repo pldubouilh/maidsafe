@@ -1,14 +1,22 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
+import sys
+import hashlib
+import binascii
+import base64
+from pbkdf2 import pbkdf2_hex
+from shaGeneration import *
 from encrypt import *
 from decrypt import *
 from twisted.internet import reactor
 from twisted.python import log
 from kademlia.network import Server
 import sys
+import time
 import pdb
-#pdb.set_trace()
+import pickle
 import getopt
 import os.path
 
@@ -22,14 +30,12 @@ def started(found, server, send, file, debug):
     hundredK = 100*oneK
     oneMeg = oneK*oneK
     twoMeg = 2*oneMeg
-    fiveMeg = 5*oneMeg
 
-    cryptoChunksSize = twoMeg
 
     if debug == 'loads': log.msg("Found nodes: %s" % found)
 
-    if send : maidSafeEncryptSetDebug(file, cryptoChunksSize, server, debug, iterations=1000, xor=False)
-    else : maidSafeDecryptSetDebug(file, cryptoChunksSize, server, debug, iterations=1000, xor=False)
+    if send : maidSafeEncryptSetDebug(file, twoMeg, server, debug, iterations=1000, xor=False)
+    else : maidSafeDecryptSetDebug(file, twoMeg, server, debug, iterations=1000, xor=False)
 
 
 
@@ -86,7 +92,7 @@ def main():
         sys.exit(2)
 
     # Default options
-    validCommand = False
+    output = None
     debug = 'wee'
     bootstrapIP = '127.0.0.1'
     bootstrapPort = 8450
@@ -129,7 +135,6 @@ def main():
             file = arg
             if os.path.isfile(arg) :
                 print '    Sending file ' + arg
-                validCommand = True
                 send = True
             else:
                 print '\n    Exiting, file not found\n'
@@ -138,24 +143,8 @@ def main():
         elif opt in ('-g'):
             file = arg
             if os.path.isfile(arg) :
-                # Proper hashes file provided
-                if arg.endswith('.hashes'):
-                    print '    Getting file ' + arg
-                    validCommand = True
-                    send = False
-                # No hash file provided
-                else:
-                    # Trying to get the hash file
-                    if os.path.isfile(arg + '.hashes') :
-                        file = arg + '.hashes'
-                        print '    Getting file ' + arg
-                        validCommand = True
-                        send = False
-
-                    # Not found. Quit
-                    else :
-                        print '    Exiting, to get a file from the network, the input file must be .hashes\n'
-                        sys.exit(2)
+                print '    Getting file ' + arg
+                send = False
 
             else:
                 print '\n    Exiting, file not found\n'
@@ -166,12 +155,7 @@ def main():
             usage()
             sys.exit(2)
 
-    if validCommand : helper(file, bootstrapIP, bootstrapPort, localPort, send, debug)
-    else :
-        print ''
-        usage()
-        print '\n    Exiting, a command, -s to send or -g to get, must be provided.\n'
-        sys.exit(2)
+    helper(file, bootstrapIP, bootstrapPort, localPort, send, debug)
 
 
 

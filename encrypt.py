@@ -1,20 +1,11 @@
-from Crypto.PublicKey import RSA
+# -*- coding: utf-8 -*-
 from Crypto.Cipher import AES
-import sys
-import hashlib
-import binascii
-import base64
-import hashlib
-from pbkdf2 import pbkdf2_hex
 from shaGeneration import *
-from entropy import *
 from tools import *
-import itertools
+from itertools import chain
 import pdb
-import sys
-
 #pdb.set_trace()
-
+from os import remove
 import pickle
 import time
 from twisted.internet import reactor, task
@@ -31,8 +22,8 @@ def sendChunks(result, i, server, encrypedHashes):
   # Out of bound, stop reactor and leave
   if i == len(encrypedHashes) :
     reactor.stop()
-    print '    File Sent !'
-    print '    Note that if you delete your .hashes file and your initial file, it will be lost in the cyphernetic ether...'
+    print '\n    File sent on network !'
+    print '    Note that if you delete your .hashes file and your initial file, it will be forever lost in the cyphernetic ether...'
     return
 
   # Get file i
@@ -40,6 +31,8 @@ def sendChunks(result, i, server, encrypedHashes):
   fc = open(('scrambled/' + fn1), 'rb')
   scrambledData = fc.read().encode('hex')
   fc.close()
+
+  remove('scrambled/' + fn1)
 
   # Increment i for next call
   i += 1
@@ -51,8 +44,8 @@ def sendChunks(result, i, server, encrypedHashes):
 
 def splitChunks(initFile, shas, encrypedHashes):
 
-    # Determine size to rechunk. (Twisted UDP Limit + headers)
-    maxSize = 4000
+    # Determine size to rechunk. (Twisted UDP Limit + headers) Max around 4020
+    maxSize = 4020
     firstElt = ('scrambled/' + str(encrypedHashes[0]))
     fc = open(firstElt, 'rb')
     scrambledData = fc.read()
@@ -81,6 +74,8 @@ def splitChunks(initFile, shas, encrypedHashes):
       newHashes = listShas(inputFile, maxSize)
       splitedHashes.append(newHashes)
 
+      remove(inputFile)
+
 
       # Loop on all sub-chunks and save
       for j in range(0, len(scrambledData), maxSize):
@@ -101,8 +96,9 @@ def splitChunks(initFile, shas, encrypedHashes):
     with open(initFile + '.hashes', 'wb') as f:
       pickle.dump([shas, encrypedHashes, splitedHashes], f)
 
+    print '    Sending slices on network'
     # Return 1 dimention list for to send on DHT
-    return list(itertools.chain(*splitedHashes))
+    return list(chain(*splitedHashes))
 
 
 

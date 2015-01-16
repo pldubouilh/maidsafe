@@ -1,15 +1,9 @@
-from Crypto.PublicKey import RSA
+# -*- coding: utf-8 -*-
 from Crypto.Cipher import AES
-import sys
-import hashlib
-import binascii
-import base64
-from pbkdf2 import pbkdf2_hex
 from shaGeneration import *
 from tools import *
-import pdb
 import pickle
-import time
+from os import remove
 import pdb
 #pdb.set_trace()
 
@@ -100,6 +94,7 @@ def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1
       fc = open(('scrambled/' + fn1), 'rb')
       scrambledData = fc.read().encode('hex')
       fc.close()
+      remove('scrambled/' + fn1)
 
       # Get data and create chunk #
       chunkNumer = i
@@ -140,4 +135,4 @@ def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1
 
       if debug != 'wee': print '    Chunk...'
 
-    print '    File successfully downloaded!'
+    print '\n    File successfully downloaded ! It should be in reconstructed/'

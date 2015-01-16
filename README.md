@@ -1,7 +1,6 @@
-Distributed Cloud Simulation
+Maidsafe-like network in python
 =======
 
-Algorithm based on [Maidsafe](http://maidsafe.net/)
 
     ##########################
     ## Maidsafe Interpreter ##
@@ -21,23 +20,28 @@ Algorithm based on [Maidsafe](http://maidsafe.net/)
     ##########################
 
 
-
-1. Start backbone kad server : `twistd -noy kademlia/examples/server.tac`
-2. Open a new terminal
-3. Send file : `./main.py -s yourfile.png`
-4. Get file  : `./main.py -g yourfile.png.hashes`
+### Introduction
+[Maidsafe](http://maidsafe.net/)-like network implemented in python. The initial algorithm has been slightly modified to increase performance. It is described in the following schematic.
 
 
-The initial algorithm has been slightly changed to increase network performance. It is described in the following schematic.
 
-Note that the verbose option is, well, _very_ verbose.
+### How to start an instance
+1. Install deps : `pip install kademlia twisted pycrypto`
+2. Start backbone kad server : `twistd -noy kademlia/examples/server.tac`
+3. Open a new terminal
+4. Send file : `./main.py -s yourfile.png`
+5. Get file  : `./main.py -g yourfile.png.hashes`
 
+The reconstructed file will be in reconstructed/. scrambled/ is the (necessary) local temp file. It should clean itself after use. Some extra options are available (see help). Note that the verbose option is, well, _very_ verbose.
+
+Fancy call graph : `pycallgraph --max-depth 5 graphviz -- ./main.py -s wind.mp3`
 
 ![Smaller icon](process.png "Title here")
 
 
 
     joe@joe:~/Desktop/maidsafe$ ./main.py -l 5678 -i 127.0.0.1 -p 8450 -d wee -s wind.mp3
+
     ##########################
     ## Maidsafe Interpreter ##
     ##########################

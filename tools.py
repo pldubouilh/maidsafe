@@ -1,12 +1,12 @@
-from Crypto.PublicKey import RSA
+'''
 from Crypto.Cipher import AES
 import sys
 import hashlib
 import binascii
 import base64
+'''
 from pbkdf2 import pbkdf2_hex
-from shaGeneration import *
-from entropy import *
+#from shaGeneration import *
 
 
 def splitStringInTwo(given_str):
