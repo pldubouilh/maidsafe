@@ -44,8 +44,8 @@ def grepChunks(result, i, j, server, splitedHashes, encrypedHashes, inputHash, c
   # Got all the chunks, return back to decryption scheme
   if i == len(encrypedHashes) :
     reactor.stop()
-    print '    Chunks downloaded from DHT!'
-    print '    Decrypting...'
+    if debug != 'none': print '    Chunks downloaded from DHT!'
+    if debug != 'none': print '    Decrypting...'
     maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=False)
     return
 
@@ -58,7 +58,7 @@ def maidSafeDecryptSetDebug(inputHash, chunkSize, server, debu, grepNotDone=True
     global debug
     debug = debu
 
-    print '    Downloading chunks from DHT...'
+    if debug != 'none': print '    Downloading chunks from DHT...'
     maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1000, xor=False)
 
 
@@ -133,6 +133,6 @@ def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1
       fc.write(outCipher)
       fc.close()
 
-      if debug != 'wee': print '    Chunk...'
+      if debug == 'normal': print '    Chunk...'
 
-    print '\n    File successfully downloaded ! It should be in reconstructed/'
+    if debug != 'none': print '\n    File successfully downloaded ! It should be in reconstructed/'

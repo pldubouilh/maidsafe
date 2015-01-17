@@ -22,8 +22,8 @@ def sendChunks(result, i, server, encrypedHashes):
   # Out of bound, stop reactor and leave
   if i == len(encrypedHashes) :
     reactor.stop()
-    print '\n    File sent on network !'
-    print '    Note that if you delete your .hashes file and your initial file, it will be forever lost in the cyphernetic ether...'
+    if debug != 'none': print '\n    File sent on network !'
+    if debug != 'none': print '    Note that if you delete your .hashes file and your initial file, it will be forever lost in the cyphernetic ether...'
     return
 
   # Get file i
@@ -55,8 +55,8 @@ def splitChunks(initFile, shas, encrypedHashes):
     rechunckFactor = len(scrambledData)/maxSize
     #if(len(scrambledData)%maxSize):
     #  rechunckFactor+=1
-    print '    Splitting chunks in smaller slices.'
-    print '    Resizing Factor >> ' + str(rechunckFactor)
+    if debug != 'none': print '    Splitting chunks in smaller slices.'
+    if debug != 'none': print '    Resizing Factor >> ' + str(rechunckFactor)
 
     splitedHashes= []
 
@@ -96,7 +96,7 @@ def splitChunks(initFile, shas, encrypedHashes):
     with open(initFile + '.hashes', 'wb') as f:
       pickle.dump([shas, encrypedHashes, splitedHashes], f)
 
-    print '    Sending slices on network'
+    if debug != 'none': print '    Sending slices on network'
     # Return 1 dimention list for to send on DHT
     return list(chain(*splitedHashes))
 
@@ -114,7 +114,7 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
 
 
     # List and save all shas
-    print '    Computing Shas...'
+    if debug != 'none': print '    Computing Shas...'
     shas = listShas(inputFile, chunkSize)
 
     # Read the contents of the file
@@ -136,7 +136,7 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
     # Init Encripted hashes list
     encrypedHashes = []
 
-    print '    Cipherin\''
+    if debug != 'none': print '    Cipherin\''
 
     # Scan all chunks
     for i in range(0, bytes, chunkSize):
@@ -174,7 +174,7 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       outCipher = cipher.encrypt(dataToHash).encode('hex')
 
       # Quick sanity check
-      if debug != 'wee': print '    Cipherin\''
+      if debug == 'normal': print '    Cipherin\''
 
       # Xor outCipher and pbkdfOut
       if xor : scrambledChunck = strxor(outCipher.decode("hex"),keyDerivOut.decode("hex"))

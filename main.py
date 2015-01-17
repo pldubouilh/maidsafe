@@ -109,6 +109,9 @@ def main():
             elif arg == 'loads':
                 debug = arg
                 print '    Printing _loads_ of logs. Might slow down the process.'
+            elif arg == 'none':
+                debug = arg
+                print '    Printing no log.'
             else:
                 print '    Invalid log argument'
                 sys.exit(2)
