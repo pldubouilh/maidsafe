@@ -14,3 +14,6 @@ reconstructed/*
 tb/*
 scrambled/*
 *.pid
+*.db
+dht/*
+kademlia/docs

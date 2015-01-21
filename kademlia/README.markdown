@@ -1,5 +1,8 @@
 # Python Distributed Hash Table
 [![Build Status](https://secure.travis-ci.org/bmuller/kademlia.png?branch=master)](https://travis-ci.org/bmuller/kademlia)
+[![Docs Status](https://readthedocs.org/projects/kademlia/badge/?version=latest)](http://kademlia.readthedocs.org)
+
+**Documentation can be found at [kademlia.readthedocs.org](http://kademlia.readthedocs.org/).**
 
 This library is an asynchronous Python implementation of the [Kademlia distributed hash table](http://en.wikipedia.org/wiki/Kademlia).  It uses [Twisted](https://twistedmatrix.com) to provide asynchronous communication.  The nodes communicate using [RPC over UDP](https://github.com/bmuller/rpcudp) to communiate, meaning that it is capable of working behind a [NAT](http://en.wikipedia.org/wiki/NAT).
 
@@ -12,7 +15,7 @@ pip install kademlia
 ```
 
 ## Usage
-*This assumes you have a working familiarity with Twisted.*
+*This assumes you have a working familiarity with [Twisted](https://twistedmatrix.com).*
 
 Assuming you want to connect to an existing network (run the standalone server example below if you don't have a network):
 

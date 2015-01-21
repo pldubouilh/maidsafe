@@ -1,8 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-from encrypt import *
-from decrypt import *
 from twisted.internet import reactor
 from twisted.python import log
 from kademlia.network import Server
@@ -11,7 +8,8 @@ import pdb
 #pdb.set_trace()
 import getopt
 import os.path
-
+from encrypt import maidSafeEncryptSetDebug
+from decrypt import maidSafeDecryptSetDebug
 
 
 
@@ -68,7 +66,7 @@ def usage():
     Optionnal:
              -l  Local port to use. Default 5678.
              -i  Bootstrap IP address. Default 127.0.0.1
-             -p  Bootstrap port. Default 8450.
+             -p  Bootstrap port. Default 8468.
              -d  Print debug log. wee < normal < loads. Default wee.
 
     ##########################\n'''
@@ -89,7 +87,7 @@ def main():
     validCommand = False
     debug = 'wee'
     bootstrapIP = '127.0.0.1'
-    bootstrapPort = 8450
+    bootstrapPort = 8468
     localPort = 5678
     file = 'a'
     send = False

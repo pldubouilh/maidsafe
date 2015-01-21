@@ -3,31 +3,20 @@ from twisted.python import log
 from kademlia.network import Server
 import sys
 
-# log to std out
 log.startLogging(sys.stdout)
 
-def quit(result):
+def done(result):
     print "Key result:", result
     reactor.stop()
 
-# Get value from NW. Callback > done...
-def get(result, server):
-    return server.get("a key").addCallback(quit)
+def setDone(result, server):
+    server.get("a key").addCallback(done)
 
-# Set value on NW. Callback > Get
-def set(found, server):
-    log.msg("Found nodes: %s" % found)
-    return server.set("a key", "a value").addCallback(get, server)
+def bootstrapDone(found, server):
+    server.set("a key", "a value").addCallback(setDone, server)
 
-
-# Start Server
 server = Server()
-
-# Start own server on port 5678
-server.listen(5678)
-
-# Bootstrap with a known ip address of an existing kad server
-# Callback on Set
-server.bootstrap([('127.0.0.1', 8450)]).addCallback(set, server)
+server.listen(8468)
+server.bootstrap([("1.2.3.4", 8468)]).addCallback(bootstrapDone, server)
 
 reactor.run()

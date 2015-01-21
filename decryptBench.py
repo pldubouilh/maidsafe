@@ -10,6 +10,7 @@ import pdb
 from twisted.internet import reactor, task
 from twisted.python import log
 from kademlia.network import Server
+from time import clock
 
 
 debug = 'wee'
@@ -20,9 +21,6 @@ def grepChunks(result, i, j, server, splitedHashes, encrypedHashes, inputHash, c
 
   # Write result from previous query
   fn1 = encrypedHashes[i]
-
-  # TODO : Check if not none
-
 
   if debug == 'normal': print '    Getting (i,j) > ' + str(i) + ', ' + str(j)
 

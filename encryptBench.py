@@ -11,9 +11,11 @@ import time
 from twisted.internet import reactor, task
 from twisted.python import log
 from kademlia.network import Server
+import time
 
 
 debug = 'wee'
+startTime, shasTime, cipherTime, resizingTime, networkTime = 0, 0, 0, 0, 0
 
 def sendChunks(result, i, server, encrypedHashes):
 
@@ -21,9 +23,11 @@ def sendChunks(result, i, server, encrypedHashes):
 
   # Out of bound, stop reactor and leave
   if i == len(encrypedHashes) :
+    global networkTime
+    networkTime = time.time()
     reactor.stop()
-    if debug != 'none': print '\n    File sent on network !'
-    if debug != 'none': print '    Note that if you delete your .hashes file and your initial file, it will be forever lost in the cyphernetic ether...'
+
+    print str(shasTime - startTime) + ',' +  str(cipherTime - startTime) + ',' +  str(resizingTime - startTime) + ',' +  str(networkTime - startTime)
     return
 
   # Get file i
@@ -104,8 +108,12 @@ def splitChunks(initFile, shas, encrypedHashes):
 
 
 def maidSafeEncryptSetDebug(inputFile, chunkSize, server, debu, iterations=1000, xor=False, i=0):
-    global debug
+
+    global debug, startTime
+
     debug = debu
+    startTime = time.time()
+
     maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=0)
 
 
@@ -116,6 +124,9 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
     # List and save all shas
     if debug != 'none': print '    Computing Shas...'
     shas = listShas(inputFile, chunkSize)
+
+    global shasTime, cipherTime, resizingTime, networkTime
+    shasTime = time.time()
 
     # Read the contents of the file
     f = open(inputFile, 'rb')
@@ -173,6 +184,7 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       cipher = AES.new(keyDerivOut[:64].decode('hex'), AES.MODE_CFB, keyDerivOut[64:(64+32)].decode('hex'))
       outCipher = cipher.encrypt(dataToHash).encode('hex')
 
+
       # Quick sanity check
       if debug == 'normal': print '    Cipherin\''
 
@@ -190,10 +202,12 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       fc.write(scrambledChunck)
       fc.close()
 
+    cipherTime = time.time()
 
     # Rector chunks into smaller chunks, swallowable by kademlia
     chunckToSend = splitChunks(inputFile, shas, encrypedHashes)
 
+    resizingTime = time.time()
 
     # Send chunks on DHT
     sendChunks(0, 0, server, chunckToSend)
