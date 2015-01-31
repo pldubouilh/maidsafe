@@ -15,7 +15,7 @@ import time
 
 
 debug = 'wee'
-startTime, shasTime, cipherTime, resizingTime, networkTime = 0, 0, 0, 0, 0
+#startTime, shasTime, cipherTime, resizingTime, networkTime = 0, 0, 0, 0, 0
 
 def sendChunks(result, i, server, encrypedHashes):
 
@@ -27,13 +27,13 @@ def sendChunks(result, i, server, encrypedHashes):
     networkTime = time.time()
     reactor.stop()
 
-    print str(shasTime - startTime) + ',' +  str(cipherTime - startTime) + ',' +  str(resizingTime - startTime) + ',' +  str(networkTime - startTime)
+    print str(shasTime - startTime) + ',' +  str(pbkdfTime) + ',' +  str(aesTime) + ',' +  str(resizingTime - startTime) + ',' +  str(networkTime - startTime)
     return
 
   # Get file i
   fn1 = encrypedHashes[i]
   fc = open(('scrambled/' + fn1), 'rb')
-  scrambledData = fc.read().encode('hex')
+  scrambledData = fc.read()
   fc.close()
 
   remove('scrambled/' + fn1)
@@ -49,7 +49,7 @@ def sendChunks(result, i, server, encrypedHashes):
 def splitChunks(initFile, shas, encrypedHashes):
 
     # Determine size to rechunk. (Twisted UDP Limit + headers) Max around 4020
-    maxSize = 4020
+    maxSize = 8100
     firstElt = ('scrambled/' + str(encrypedHashes[0]))
     fc = open(firstElt, 'rb')
     scrambledData = fc.read()
@@ -125,7 +125,7 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
     if debug != 'none': print '    Computing Shas...'
     shas = listShas(inputFile, chunkSize)
 
-    global shasTime, cipherTime, resizingTime, networkTime
+    global shasTime, resizingTime, networkTime, aesTime, pbkdfTime
     shasTime = time.time()
 
     # Read the contents of the file
@@ -148,6 +148,9 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
     encrypedHashes = []
 
     if debug != 'none': print '    Cipherin\''
+
+    pbkdfTime = 0
+    aesTime = 0
 
     # Scan all chunks
     for i in range(0, bytes, chunkSize):
@@ -177,20 +180,28 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
 
 
       # Need massive key deriv to xor out of AES
+      tstemp = time.time()
+
       if xor : keyDerivOut = keyDeriv(shaOne, shaTwo, shaThree, len(dataToHash), iterations)
       else : keyDerivOut = keyDeriv(shaOne, shaTwo, shaThree, 48, iterations)
 
+      pbkdfTime += time.time() - tstemp
+
+
+      tstemp = time.time()
+
       # Encrypt
       cipher = AES.new(keyDerivOut[:64].decode('hex'), AES.MODE_CFB, keyDerivOut[64:(64+32)].decode('hex'))
-      outCipher = cipher.encrypt(dataToHash).encode('hex')
+      outCipher = cipher.encrypt(dataToHash)
 
+      aesTime += time.time() - tstemp
 
       # Quick sanity check
       if debug == 'normal': print '    Cipherin\''
 
       # Xor outCipher and pbkdfOut
-      if xor : scrambledChunck = strxor(outCipher.decode("hex"),keyDerivOut.decode("hex"))
-      else : scrambledChunck = outCipher.decode('hex')
+      if xor : scrambledChunck = strxor(outCipher,keyDerivOut.decode("hex"))
+      else : scrambledChunck = outCipher
 
 
       # Compute hash of encrypted datas
@@ -202,7 +213,6 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       fc.write(scrambledChunck)
       fc.close()
 
-    cipherTime = time.time()
 
     # Rector chunks into smaller chunks, swallowable by kademlia
     chunckToSend = splitChunks(inputFile, shas, encrypedHashes)

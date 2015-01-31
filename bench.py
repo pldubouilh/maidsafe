@@ -16,23 +16,29 @@ import os.path
 
 def started(found, server, send, file, debug, size):
 
-    oneK = 1024
-    hundredK = 100*oneK
-    fiveHundredK = 5*hundredK
-    oneMeg = oneK*oneK
+    ''' No slices below here'''
+    oneKil = 1024
+    twoKil = 2*oneKil
+    forKil = 4*oneKil
+
+    ''' Limit. Max pket size ~8k - headers. '''
+    noSlices = 8100
+
+    ''' Operating slices below '''
+    tenKil = 10*oneKil
+    fifKil = 50*oneKil
+    hunKil = 100*oneKil
+    twhKil = 2*hunKil
+    fvhKil = 5*hunKil
+    oneMeg = oneKil*oneKil
     twoMeg = 2*oneMeg
-    fourMeg = 2*twoMeg
-    fiveMeg = 5*oneMeg
-
-    cryptoChunksSize = oneMeg
-
-    if size == 'oneK': cryptoChunksSize = oneK
-    elif size == 'hundredK': cryptoChunksSize = oneK
-    elif size == 'fiveHundredK': cryptoChunksSize = fiveHundredK
-    elif size == 'oneMeg': cryptoChunksSize = oneMeg
-    elif size == 'twoMeg': cryptoChunksSize = twoMeg
-    elif size == 'fourMeg': cryptoChunksSize = fourMeg
-    elif size == 'fiveMeg': cryptoChunksSize = fiveMeg
+    fivMeg = 5*oneMeg
+    eigMeg = 8*oneMeg
+    tenMeg = 10*oneMeg
+    fifMeg = 15*oneMeg
+    tweMeg = 20*oneMeg
+    
+    exec("%s = %s" % ('cryptoChunksSize',size))
 
     if debug == 'loads': log.msg("Found nodes: %s" % found)
 

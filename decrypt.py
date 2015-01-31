@@ -12,7 +12,6 @@ from twisted.python import log
 from kademlia.network import Server
 
 
-debug = 'wee'
 
 def grepChunks(result, i, j, server, splitedHashes, encrypedHashes, inputHash, chunkSize):
 
@@ -29,11 +28,11 @@ def grepChunks(result, i, j, server, splitedHashes, encrypedHashes, inputHash, c
   # Create new file if new chunk. Append otherwise.
   if (j == 0):
     fc = open(('scrambled/' + fn1), 'wb')
-    fc.write(result.decode('hex'))
+    fc.write(result)
     fc.close()
   else:
     fc = open(('scrambled/' + fn1), 'ab')
-    fc.write(result.decode('hex'))
+    fc.write(result)
     fc.close()
 
 
@@ -95,7 +94,7 @@ def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1
       fn1 = encHashes[i]
 
       fc = open(('scrambled/' + fn1), 'rb')
-      scrambledData = fc.read().encode('hex')
+      scrambledData = fc.read()
       fc.close()
       remove('scrambled/' + fn1)
 
@@ -122,8 +121,8 @@ def maidSafeDecrypt(inputHash, chunkSize, server, grepNotDone=True, iterations=1
       else : keyDerivOut = keyDeriv(shaOne, shaTwo, shaThree, 48, iterations)
 
       # Unxor if needed
-      if xor: unXored = strxor(scrambledData.decode("hex"),keyDerivOut.decode("hex"))
-      else: unXored = scrambledData.decode('hex')
+      if xor: unXored = strxor(scrambledData,keyDerivOut.decode("hex"))
+      else: unXored = scrambledData
 
       # Setup cipher with key = first half[:32] of pbkdf2, and IV = second part[:16]
       cipher = AES.new(keyDerivOut[:64].decode('hex'), AES.MODE_CFB, keyDerivOut[64:(64+32)].decode('hex'))

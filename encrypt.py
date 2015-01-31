@@ -11,9 +11,9 @@ import time
 from twisted.internet import reactor, task
 from twisted.python import log
 from kademlia.network import Server
+from progressbar import ProgressBar
+import bz2
 
-
-debug = 'wee'
 
 def sendChunks(result, i, server, encrypedHashes):
 
@@ -29,7 +29,7 @@ def sendChunks(result, i, server, encrypedHashes):
   # Get file i
   fn1 = encrypedHashes[i]
   fc = open(('scrambled/' + fn1), 'rb')
-  scrambledData = fc.read().encode('hex')
+  scrambledData = fc.read()
   fc.close()
 
   remove('scrambled/' + fn1)
@@ -45,7 +45,7 @@ def sendChunks(result, i, server, encrypedHashes):
 def splitChunks(initFile, shas, encrypedHashes):
 
     # Determine size to rechunk. (Twisted UDP Limit + headers) Max around 4020
-    maxSize = 4020
+    maxSize = 8100
     firstElt = ('scrambled/' + str(encrypedHashes[0]))
     fc = open(firstElt, 'rb')
     scrambledData = fc.read()
@@ -133,6 +133,10 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
     if(bytes%chunkSize):
       noOfChunks+=1
 
+    #widgets = ['Something: ', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA]
+    #if(debug != 'none'): pbar = ProgressBar(widgets=widgets, maxval=noOfChunks)
+
+
     # Init Encripted hashes list
     encrypedHashes = []
 
@@ -141,9 +145,12 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
     # Scan all chunks
     for i in range(0, bytes, chunkSize):
 
+
       # Get data and create chunk #
       chunkNumer = i/chunkSize
       dataToHash = data[i:i+ chunkSize]
+
+      #if(debug != 'none'): pbar.update(chunkNumer)
 
       # Prevent creation of 0 bit file is filezise is multiple of 2^n
       if(len(dataToHash) == 0):
@@ -165,20 +172,21 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
         shaThree = shas[chunkNumer]
 
 
+
       # Need massive key deriv to xor out of AES
       if xor : keyDerivOut = keyDeriv(shaOne, shaTwo, shaThree, len(dataToHash), iterations)
       else : keyDerivOut = keyDeriv(shaOne, shaTwo, shaThree, 48, iterations)
 
       # Encrypt
       cipher = AES.new(keyDerivOut[:64].decode('hex'), AES.MODE_CFB, keyDerivOut[64:(64+32)].decode('hex'))
-      outCipher = cipher.encrypt(dataToHash).encode('hex')
+      outCipher = cipher.encrypt(dataToHash)
 
       # Quick sanity check
       if debug == 'normal': print '    Cipherin\''
 
       # Xor outCipher and pbkdfOut
       if xor : scrambledChunck = strxor(outCipher.decode("hex"),keyDerivOut.decode("hex"))
-      else : scrambledChunck = outCipher.decode('hex')
+      else : scrambledChunck = outCipher
 
 
       # Compute hash of encrypted datas
@@ -191,6 +199,7 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       fc.close()
 
 
+    #if(debug != 'none'): pbar.finish()
     # Rector chunks into smaller chunks, swallowable by kademlia
     chunckToSend = splitChunks(inputFile, shas, encrypedHashes)
 

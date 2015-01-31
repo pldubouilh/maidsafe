@@ -8,7 +8,7 @@ from kademlia.network import Server
 from kademlia import log
 
 application = service.Application("kademlia")
-application.setComponent(ILogObserver, log.FileLogObserver(sys.stdout, log.ERROR).emit)
+application.setComponent(ILogObserver, log.FileLogObserver(sys.stdout, 0).emit)
 
 if os.path.isfile('cache.pickle'):
     kserver = Server.loadState('cache.pickle')

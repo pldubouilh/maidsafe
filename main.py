@@ -16,13 +16,17 @@ from decrypt import maidSafeDecryptSetDebug
 
 def started(found, server, send, file, debug):
 
-    oneK = 1024
-    hundredK = 100*oneK
-    oneMeg = oneK*oneK
+    noSlices = 8100
+    oneKil = 1024
+    tenKil = 10*oneKil
+    hunKil = 100*oneKil
+    oneMeg = oneKil*oneKil
     twoMeg = 2*oneMeg
-    fiveMeg = 5*oneMeg
+    fivMeg = 5*oneMeg
+    eigMeg = 8*oneMeg
+    tenMeg = 10*oneMeg
 
-    cryptoChunksSize = twoMeg
+    cryptoChunksSize = oneMeg
 
     if debug == 'loads': log.msg("Found nodes: %s" % found)
 
