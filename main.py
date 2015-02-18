@@ -26,12 +26,19 @@ def started(found, server, send, file, debug):
     eigMeg = 8*oneMeg
     tenMeg = 10*oneMeg
 
-    cryptoChunksSize = oneMeg
+    cryptoChunksSize = twoMeg
 
     if debug == 'loads': log.msg("Found nodes: %s" % found)
 
-    if send : maidSafeEncryptSetDebug(file, cryptoChunksSize, server, debug, iterations=1000, xor=False)
-    else : maidSafeDecryptSetDebug(file, cryptoChunksSize, server, debug, iterations=1000, xor=False)
+    if len(found) == 0:
+        print '    Bootstraping returned nothing.'
+        print '    Exiting...'
+        reactor.stop()
+        return
+        sys.exit(2)
+
+    if send : maidSafeEncryptSetDebug(file, cryptoChunksSize, server, debug, iterations=2000, xor=False)
+    else : maidSafeDecryptSetDebug(file, cryptoChunksSize, server, debug, iterations=2000, xor=False)
 
 
 

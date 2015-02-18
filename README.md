@@ -31,7 +31,7 @@ Maidsafe-like network in python
 ### How to start an instance
 
 1. Clone repo : `git clone https://github.com/pldubouilh/maidsafe.git && cd maidsafe`
-2. Install modified Kademlia and other deps : `pip install twisted pycrypto && pip install -e kademlia/`
+2. Install modified Kademlia and other deps : `pip install twisted pycrypto && pip install -e rpcudp-master/ kademlia/`
 3. Create necessary directories `mkdir reconstructed scrambled dht`
 4. Start backbone kad server : `twistd -noy kademlia/examples/server.tac`
 5. Open a new terminal

@@ -10,7 +10,8 @@ from zope.interface import Interface
 
 from kademlia.log import Logger
 import pdb
-
+import sys
+import os
 
 '''
     Using a sqlite3 to store chunks. Excruciatingly slow...
@@ -47,8 +48,11 @@ def setOnDb(conn, key, val):
 '''
     Using a simple file to store chunks
 '''
+def getScriptPath():
+    return os.path.dirname(os.path.realpath(sys.argv[0]))
+
 def query(request):
-    inputFile = '/Users/joe/Desktop/maidsafe/dht/' + request.encode('hex')
+    inputFile = os.getcwd() + '/dht/' + request.encode('hex')
     f = open(inputFile, 'rb')
     data = f.read()
     f.close()
@@ -56,7 +60,7 @@ def query(request):
 
 
 def setOnDb(key, val):
-    newChunk = '/Users/joe/Desktop/maidsafe/dht/' + key.encode('hex')
+    newChunk = os.getcwd() +  '/dht/' + key.encode('hex')
     fc = open(newChunk, 'wb')
     fc.write(val)
     fc.close()

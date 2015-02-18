@@ -23,11 +23,10 @@ def sendChunks(result, i, server, encrypedHashes):
 
   # Out of bound, stop reactor and leave
   if i == len(encrypedHashes) :
-    global networkTime
-    networkTime = time.time()
+    global networkTime, tstempNW
     reactor.stop()
 
-    print str(shasTime - startTime) + ',' +  str(pbkdfTime) + ',' +  str(aesTime) + ',' +  str(resizingTime - startTime) + ',' +  str(networkTime - startTime)
+    print str(shasTime) + ',' +  str(pbkdfTime) + ',' +  str(aesTime) + ',' +  str(resizingTime) + ',' +  str(time.time() - tstempNW)
     return
 
   # Get file i
@@ -119,14 +118,16 @@ def maidSafeEncryptSetDebug(inputFile, chunkSize, server, debu, iterations=1000,
 
 
 def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=0):
+    global shasTime, resizingTime, networkTime, aesTime, pbkdfTime, tstempNW
 
 
+    tstemp = time.time()
     # List and save all shas
     if debug != 'none': print '    Computing Shas...'
     shas = listShas(inputFile, chunkSize)
+    shasTime = time.time() - tstemp
 
-    global shasTime, resizingTime, networkTime, aesTime, pbkdfTime
-    shasTime = time.time()
+
 
     # Read the contents of the file
     f = open(inputFile, 'rb')
@@ -214,10 +215,13 @@ def maidSafeEncrypt(inputFile, chunkSize, server, iterations=1000, xor=False, i=
       fc.close()
 
 
+    tstemp = time.time()
+
     # Rector chunks into smaller chunks, swallowable by kademlia
     chunckToSend = splitChunks(inputFile, shas, encrypedHashes)
 
-    resizingTime = time.time()
+    resizingTime = time.time() - tstemp
 
+    tstempNW = time.time()
     # Send chunks on DHT
     sendChunks(0, 0, server, chunckToSend)

@@ -9,7 +9,6 @@
 *.zip
 *.rnd
 c
-rpcudp-master
 unti
 reconstructed/*
 tb/*
