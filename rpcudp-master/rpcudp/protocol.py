@@ -10,11 +10,10 @@ from twisted.python import log
 
 from rpcudp.exceptions import MalformedMessage
 
-
 class RPCProtocol(protocol.DatagramProtocol):
     noisy = False
 
-    def __init__(self, waitTimeout=5):
+    def __init__(self, waitTimeout=1):
         """
         @param waitTimeout: Consider it a connetion failure if no response
         within this time window.
@@ -70,11 +69,19 @@ class RPCProtocol(protocol.DatagramProtocol):
         txdata = '\x01%s%s' % (msgID, umsgpack.packb(response))
         self.transport.write(txdata, address)
 
-    def _timeout(self, msgID):
+    def _timeout(self, msgID, txdata, address):
+
         args = (b64encode(msgID), self._waitTimeout)
-        log.err("Did not received reply for msg id %s within %i seconds" % args)
-        self._outstanding[msgID][0].callback((False, None))
+        print "    Did not received reply for msg id %s within %i seconds" % args
+        print '    Retrying...'
+
+        d, timeout = self._outstanding[msgID]
         del self._outstanding[msgID]
+
+        self.transport.write(txdata, address)
+        timeout = reactor.callLater(self._waitTimeout, self._timeout, msgID, txdata, address)
+        self._outstanding[msgID] = (d, timeout)
+        return d
 
     def __getattr__(self, name):
         if name.startswith("_") or name.startswith("rpc_"):
@@ -96,7 +103,7 @@ class RPCProtocol(protocol.DatagramProtocol):
                 log.msg("calling remote function %s on %s (msgid %s)" % (name, address, b64encode(msgID)))
             self.transport.write(txdata, address)
             d = defer.Deferred()
-            timeout = reactor.callLater(self._waitTimeout, self._timeout, msgID)
+            timeout = reactor.callLater(self._waitTimeout, self._timeout, msgID, txdata, address)
             self._outstanding[msgID] = (d, timeout)
             return d
         return func
