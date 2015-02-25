@@ -11,7 +11,6 @@ import time
 from twisted.internet import reactor, task
 from twisted.python import log
 from kademlia.network import Server
-from progressbar import ProgressBar
 import bz2
 
 
