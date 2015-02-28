@@ -17,5 +17,7 @@ pip install twisted && \
 cd ~ && git clone https://github.com/pldubouilh/maidsafe.git && cd maidsafe && \
 pip install -e rpcudp-master && \
 pip install -e kademlia/ && \
-mkdir reconstructed scrambled dht
+mkdir reconstructed scrambled dht && \
+dd if=/dev/urandom of=1meg bs=1M count=1 && \
+dd if=/dev/urandom of=10meg bs=1M count=10
 CMD ["bash"]
