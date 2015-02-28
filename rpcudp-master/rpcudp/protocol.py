@@ -74,8 +74,14 @@ class RPCProtocol(protocol.DatagramProtocol):
     def _timeout(self, msgID, txdata, address):
 
         args = (b64encode(msgID), self._waitTimeout)
-        if config.debug != 'none' : print '    Did not received reply for msg id %s within %i seconds, retrying' % args
-        config.totalLoss += 1
+
+
+        try:
+            if config.debug != 'none' : print '    Did not received reply for msg id %s within %i seconds, retrying' % args
+            config.totalLoss += 1
+        except:
+            pass
+
         d, timeout = self._outstanding[msgID]
         del self._outstanding[msgID]
 
