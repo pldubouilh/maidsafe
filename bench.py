@@ -10,7 +10,7 @@ import pdb
 #pdb.set_trace()
 import getopt
 import os.path
-
+import config
 
 
 
@@ -37,7 +37,7 @@ def started(found, server, send, file, debug, size):
     tenMeg = 10*oneMeg
     fifMeg = 15*oneMeg
     tweMeg = 20*oneMeg
-    
+
     exec("%s = %s" % ('cryptoChunksSize',size))
 
     if debug == 'loads': log.msg("Found nodes: %s" % found)
@@ -48,6 +48,10 @@ def started(found, server, send, file, debug, size):
 
 
 def helper(file, ip, bootstrapPort, localPort, send, debug, size):
+
+    # No loss yet !
+    config.totalLoss = 0
+    config.debug = debug
 
     # Start Server
     if debug == 'loads': log.startLogging(sys.stdout)

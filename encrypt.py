@@ -12,6 +12,7 @@ from twisted.internet import reactor, task
 from twisted.python import log
 from kademlia.network import Server
 import bz2
+import config
 
 
 def sendChunks(result, i, server, encrypedHashes):
@@ -23,6 +24,8 @@ def sendChunks(result, i, server, encrypedHashes):
     reactor.stop()
     if debug != 'none': print '\n    File sent on network !'
     if debug != 'none': print '    Note that if you delete your .hashes file and your initial file, it will be forever lost in the cyphernetic ether...'
+    if debug != 'none': print '    '+ str(config.totalLoss) + ' packets were lost during the transfer, but it\'s been successfully resent.'
+
     return
 
   # Get file i

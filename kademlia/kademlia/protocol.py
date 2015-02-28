@@ -8,6 +8,7 @@ from kademlia.node import Node
 from kademlia.routing import RoutingTable
 from kademlia.log import Logger
 from kademlia.utils import digest
+import config
 
 
 class KademliaProtocol(RPCProtocol):

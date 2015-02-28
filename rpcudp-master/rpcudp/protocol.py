@@ -9,9 +9,11 @@ from twisted.internet import defer
 from twisted.python import log
 
 from rpcudp.exceptions import MalformedMessage
+import config
 
 class RPCProtocol(protocol.DatagramProtocol):
     noisy = False
+
 
     def __init__(self, waitTimeout=1):
         """
@@ -72,8 +74,8 @@ class RPCProtocol(protocol.DatagramProtocol):
     def _timeout(self, msgID, txdata, address):
 
         args = (b64encode(msgID), self._waitTimeout)
-        #print '    Did not received reply for msg id %s within %i seconds, retrying' % args
-
+        if config.debug != 'none' : print '    Did not received reply for msg id %s within %i seconds, retrying' % args
+        config.totalLoss += 1
         d, timeout = self._outstanding[msgID]
         del self._outstanding[msgID]
 

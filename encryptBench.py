@@ -12,7 +12,7 @@ from twisted.internet import reactor, task
 from twisted.python import log
 from kademlia.network import Server
 import time
-
+import config
 
 debug = 'wee'
 #startTime, shasTime, cipherTime, resizingTime, networkTime = 0, 0, 0, 0, 0
@@ -26,7 +26,7 @@ def sendChunks(result, i, server, encrypedHashes):
     global networkTime, tstempNW
     reactor.stop()
 
-    print str(shasTime) + ',' +  str(pbkdfTime) + ',' +  str(aesTime) + ',' +  str(resizingTime) + ',' +  str(time.time() - tstempNW)
+    print str(shasTime) + ',' +  str(pbkdfTime) + ',' +  str(aesTime) + ',' +  str(resizingTime) + ',' +  str(time.time() - tstempNW) + ',' + str(config.totalLoss)
     return
 
   # Get file i

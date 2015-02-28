@@ -14,6 +14,7 @@ from kademlia.storage import ForgetlessStorage
 from kademlia.node import Node
 from kademlia.crawling import ValueSpiderCrawl
 from kademlia.crawling import NodeSpiderCrawl
+import config
 
 
 class Server(object):

@@ -10,7 +10,7 @@ import getopt
 import os.path
 from encrypt import maidSafeEncryptSetDebug
 from decrypt import maidSafeDecryptSetDebug
-
+import config
 
 
 
@@ -44,6 +44,10 @@ def started(found, server, send, file, debug):
 
 
 def helper(file, ip, bootstrapPort, localPort, send, debug):
+
+    # No loss yet !
+    config.totalLoss = 0
+    config.debug = debug
 
     # Start Server
     if debug == 'loads': log.startLogging(sys.stdout)

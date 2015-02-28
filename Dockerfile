@@ -12,7 +12,7 @@ apt-get -y upgrade && \
 apt-get -y install -q build-essential git python-dev libffi-dev libssl-dev python-pip
 
 # Install required python packages, and twisted
-RUN pip install service_identity pycrypto && \
+RUN pip install service_identity pycrypto config && \
 pip install twisted && \
 cd ~ && git clone https://github.com/pldubouilh/maidsafe.git && cd maidsafe && \
 pip install -e rpcudp-master && \
